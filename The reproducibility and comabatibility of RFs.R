@@ -10,8 +10,8 @@ A<- unique(Data$Batch)
 B<- unique(Data$Batch)
 
 #CREATE THE MATRICES TO RECORD THE NUMBER OF FEATURES IN EACH PAIRWISE SCENARIO
-Mat_stable<- as.data.frame(matrix(0, ncol=length(A), nrow= length(B)), row.names = as.character(B))
-colnames(Mat_stable)<- c(A)
+Mat_Rep<- as.data.frame(matrix(0, ncol=length(A), nrow= length(B)), row.names = as.character(B))
+colnames(Mat_Rep)<- c(A)
 Mat_ComBat<-as.data.frame(matrix(0, ncol=length(A), nrow= length(B)), row.names = as.character(B))
 colnames(Mat_ComBat)<- c(A)
 
@@ -38,24 +38,24 @@ for (i in 1:length(A)){
         
         
         CCC<- epi.occc(Data2[,2:(length(Batches)+1)], pairs = T)
-        OCC_All[l,2]<-  CCC$pairs
+        CCC_All[l,2]<-  CCC$pairs
         
       }
       
       
-      Stable_All_OCCC<- c()
+      Rep_All_CCC<- c()
       for (n in 1:length(Features_All)){
-        if(!(is.na(OCC_All[n,2]))){
-          if (OCC_All[n,2]=='NaN'){
-            Stable_All_OCCC<- append(Stable_All_OCCC,OCC_All[n,1])
+        if(!(is.na(CCC_All[n,2]))){
+          if (CCC_All[n,2]=='NaN'){
+            Rep_All_CCC<- append(Rep_All_CCC,CCC_All[n,1])
           }
-          else if (OCC_All[n,2]>0.90){
-            Stable_All_OCCC<- append(Stable_All_OCCC,OCC_All[n,1])
+          else if (CCC_All[n,2]>0.90){
+            Rep_All_CCC<- append(Rep_All_CCC,CCC_All[n,1])
           }
         }
         }
         
-      Mat_stable[j,i]<- length(Stable_All_OCCC)
+      Mat_Rep[j,i]<- length(Rep_All_CCC)
       #START THE COMBAT PROCESS
       Harmonize<-Data[Data$Batch %in% Batches, ]
       #REMOVE VARIABLES WITH (Near)ZERO VARIANCE
@@ -92,8 +92,8 @@ for (i in 1:length(A)){
         
         Harmonized<- cbind(Harmonize[,1:6], Harmonized)
         
-        OCC_All_ComBatted<- as.data.frame(matrix(0, ncol=2, nrow= length(Features_All)))
-        OCC_All_ComBatted$V1<- as.character(Features_All)
+        CCC_All_ComBatted<- as.data.frame(matrix(0, ncol=2, nrow= length(Features_All)))
+        CCC_All_ComBatted$V1<- as.character(Features_All)
         
         for (h in 1:length(Features_All)){
           Data2<- as.data.frame(matrix(0, ncol=(length(Batches)+1), nrow=160))
@@ -105,21 +105,21 @@ for (i in 1:length(A)){
           
           
           CCC<- epi.occc(Data2[,2:(length(Batches)+1)], pairs= T)
-          OCC_All_ComBatted[h,2]<-  CCC$occc
+          CCC_All_ComBatted[h,2]<-  CCC$pairs
           
         }
         
         
-        ComBatable_All_OCCC<- c()
+        ComBatable_All_CCC<- c()
         for (q in 1:length(Features_All)){
-          if (OCC_All_ComBatted[q,2]=='NaN'){
-            ComBatable_All_OCCC<- append(ComBatable_All_OCCC,OCC_All_ComBatted[q,1])
+          if (CCC_All_ComBatted[q,2]=='NaN'){
+            ComBatable_All_CCC<- append(ComBatable_All_CCC,CCC_All_ComBatted[q,1])
           }
-          else if (OCC_All_ComBatted[q,2]>0.9){
-            ComBatable_All_OCCC<- append(ComBatable_All_OCCC,OCC_All_ComBatted[q,1])
+          else if (CCC_All_ComBatted[q,2]>0.9){
+            ComBatable_All_CCC<- append(ComBatable_All_CCC,CCC_All_ComBatted[q,1])
           }
         }
-        Mat_ComBat[j,i]<- paste(as.character(length(ComBatable_All_OCCC)), as.character(length(Features_All)), sep = "/")
+        Mat_ComBat[j,i]<- paste(as.character(length(ComBatable_All_CCC)), as.character(length(Features_All)), sep = "/")
         rm("Harmonized")
         
       }
@@ -134,5 +134,5 @@ for (i in 1:length(A)){
  }
     
 #SAVE THE MATRICES TO CSV FILES
-write.csv(Mat_stable, "stable_CCR2_pairs_RadiomiX_0.9.csv") 
-write.csv(Mat_ComBat, "ComBat_CCR1_pairs_RadiomiX_0.9.csv")
+write.csv(Mat_Rep, "reproducible_CCR1_pairs_0.9.csv") 
+write.csv(Mat_ComBat, "ComBatable_CCR1_pairs_0.9.csv")
